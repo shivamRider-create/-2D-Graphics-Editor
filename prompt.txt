@@ -1,0 +1,550 @@
+This program is a **Menu-Driven 2D Graphics Editor in C**. It uses a **2D character array** as a drawing canvas where:
+
+* `_` (underscore) = Empty space
+* `*` (asterisk) = Drawn shape
+
+It allows users to:
+
+1. Add Shapes
+2. Delete Shapes
+3. Modify Shapes
+4. Display Canvas
+5. List Shapes
+
+---
+
+# 1. Constants and Definitions
+
+```c
+#define WIDTH 60
+#define HEIGHT 30
+#define MAX_SHAPES 100
+```
+
+* Canvas size = **60 columns × 30 rows**
+* Maximum 100 shapes can be stored
+
+---
+
+# 2. Shape Types
+
+```c
+typedef enum { LINE, RECTANGLE, CIRCLE, TRIANGLE } ShapeType;
+```
+
+Enumeration creates four shape types:
+
+| Value     | Shape     |
+| --------- | --------- |
+| LINE      | Line      |
+| RECTANGLE | Rectangle |
+| CIRCLE    | Circle    |
+| TRIANGLE  | Triangle  |
+
+---
+
+# 3. Shape Structure
+
+```c
+typedef struct {
+    int id;
+    ShapeType type;
+    int x1,y1,x2,y2,x3,y3;
+    int r;
+    int active;
+} Shape;
+```
+
+Stores details of each shape.
+
+Example:
+
+```c
+Shape s;
+```
+
+For a circle:
+
+```c
+s.id = 1;
+s.type = CIRCLE;
+s.x1 = 20;
+s.y1 = 10;
+s.r = 5;
+```
+
+---
+
+# 4. Global Variables
+
+```c
+char canvas[HEIGHT][WIDTH];
+```
+
+Creates the drawing area.
+
+```c
+Shape shapes[MAX_SHAPES];
+```
+
+Stores all shapes.
+
+```c
+int shapeCount = 0;
+```
+
+Number of shapes currently stored.
+
+```c
+int nextId = 1;
+```
+
+Unique ID generator.
+
+---
+
+# 5. Initialize Canvas
+
+```c
+void initCanvas()
+```
+
+Fills the canvas with `_`.
+
+Example:
+
+```
+_ _ _ _ _
+_ _ _ _ _
+_ _ _ _ _
+```
+
+---
+
+# 6. Display Canvas
+
+```c
+void displayCanvas()
+```
+
+Prints the canvas on the screen.
+
+Example:
+
+```
+* * * * *
+_ _ _ _ _
+_ _ _ _ _
+```
+
+---
+
+# 7. Draw Point
+
+```c
+void drawPoint(int x, int y)
+```
+
+Draws one pixel.
+
+Example:
+
+```c
+drawPoint(5,3);
+```
+
+Output:
+
+```
+_ _ _ _ _
+_ _ _ _ _
+_ _ _ _ _
+_ _ _ * _
+```
+
+---
+
+# 8. Line Drawing Algorithm
+
+```c
+void drawLineAlgo(...)
+```
+
+Uses **Bresenham's Line Algorithm**.
+
+Purpose:
+
+* Draws straight lines efficiently.
+* Calculates nearest points without floating-point operations.
+
+Example:
+
+```c
+drawLineAlgo(2,2,8,2);
+```
+
+Output:
+
+```
+__*******
+```
+
+---
+
+# 9. Circle Drawing
+
+### Circle Symmetry
+
+```c
+void drawCirclePoints(...)
+```
+
+Draws 8 symmetric points at once.
+
+Because a circle is symmetric in all directions.
+
+---
+
+### Midpoint Circle Algorithm
+
+```c
+void drawCircleAlgo(...)
+```
+
+Draws circles efficiently.
+
+Example:
+
+```c
+drawCircleAlgo(20,10,5);
+```
+
+Produces:
+
+```
+    ***
+  *     *
+ *       *
+ *       *
+  *     *
+    ***
+```
+
+---
+
+# 10. Rendering Shapes
+
+```c
+void renderShapes()
+```
+
+Most important function.
+
+Steps:
+
+### Step 1
+
+```c
+initCanvas();
+```
+
+Clears old drawing.
+
+### Step 2
+
+Loops through all shapes:
+
+```c
+for(int i=0;i<shapeCount;i++)
+```
+
+### Step 3
+
+Draws active shapes only.
+
+```c
+if(!shapes[i].active)
+    continue;
+```
+
+### Step 4
+
+Depending on shape type:
+
+#### Line
+
+```c
+drawLineAlgo(...)
+```
+
+#### Rectangle
+
+Draws 4 sides using lines.
+
+```c
+Top
+Right
+Bottom
+Left
+```
+
+#### Circle
+
+```c
+drawCircleAlgo(...)
+```
+
+#### Triangle
+
+Draws 3 connected lines.
+
+---
+
+# 11. Add Shape
+
+```c
+void addShape()
+```
+
+Menu:
+
+```
+1. Line
+2. Rectangle
+3. Circle
+4. Triangle
+```
+
+Example:
+
+```
+Choice: 1
+Enter x1,y1,x2,y2:
+5 5 20 5
+```
+
+Creates:
+
+```c
+Shape s;
+```
+
+Assigns:
+
+```c
+s.id = nextId++;
+```
+
+Stores shape:
+
+```c
+shapes[shapeCount++] = s;
+```
+
+Then redraws all shapes.
+
+---
+
+# 12. Delete Shape
+
+```c
+void deleteShape()
+```
+
+User enters ID.
+
+Example:
+
+```
+Enter Shape ID: 2
+```
+
+Program searches:
+
+```c
+if(shapes[i].id == id)
+```
+
+Instead of removing it physically:
+
+```c
+shapes[i].active = 0;
+```
+
+Shape becomes inactive.
+
+Then:
+
+```c
+renderShapes();
+```
+
+Redraws canvas.
+
+---
+
+# 13. Modify Shape
+
+```c
+void modifyShape()
+```
+
+Finds shape by ID.
+
+Example:
+
+```
+ID = 3
+```
+
+If it's a line:
+
+```c
+scanf("%d %d %d %d",...)
+```
+
+Gets new coordinates.
+
+Updates values.
+
+Calls:
+
+```c
+renderShapes();
+```
+
+Canvas updates automatically.
+
+---
+
+# 14. List Active Shapes
+
+```c
+void listShapes()
+```
+
+Shows all existing shapes.
+
+Example:
+
+```
+ID:1 Type:Line
+ID:2 Type:Rectangle
+ID:4 Type:Circle
+```
+
+Deleted shapes won't appear.
+
+---
+
+# 15. Main Function
+
+```c
+int main()
+```
+
+Runs forever using:
+
+```c
+while(1)
+```
+
+Displays menu:
+
+```
+1. Add Shape
+2. Delete Shape
+3. Modify Shape
+4. Display Canvas
+5. List Active Shapes
+6. Exit
+```
+
+Uses:
+
+```c
+switch(choice)
+```
+
+to call the corresponding function.
+
+Example:
+
+```c
+case 1:
+    addShape();
+    break;
+```
+
+---
+
+# Example Execution
+
+```
+=== 2D Graphics Editor ===
+
+1. Add Shape
+2. Delete Shape
+3. Modify Shape
+4. Display Canvas
+5. List Active Shapes
+6. Exit
+
+Choice: 1
+```
+
+Add rectangle:
+
+```
+Choice: 2
+Enter:
+5 5 20 15
+```
+
+Canvas:
+
+```
+_____***************
+_____*
+_____*
+_____*
+_____***************
+```
+
+Then add a circle:
+
+```
+Choice: 3
+Center:
+30 10
+Radius:
+5
+```
+
+Now both shapes appear together because all shapes are stored and redrawn by `renderShapes()`.
+
+---
+
+### Viva Questions You May Be Asked
+
+1. **Why use a 2D array?**
+
+   * To represent the drawing canvas as rows and columns.
+
+2. **Why use Bresenham's Algorithm?**
+
+   * Fast and efficient line drawing using integer calculations.
+
+3. **Why use Midpoint Circle Algorithm?**
+
+   * Efficient circle drawing with symmetry.
+
+4. **Why use `active` flag instead of deleting shape?**
+
+   * Easier management and faster deletion.
+
+5. **What is the time complexity of rendering?**
+
+   * Approximately **O(number of shapes × points drawn)**.
+
+This is essentially a small CAD/paint-like application implemented in C using fundamental computer graphics algorithms.
